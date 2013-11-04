@@ -1,0 +1,80 @@
+Program		bug2k;
+
+	#include ( "stdlib.hhf" )
+
+static
+
+	jour:			uns8;
+	mois:			uns8;
+	annee:			uns8;
+
+	paquet_date:	word;
+
+procedure	showBinary16 ( value: word );
+begin		showBinary16;
+
+	push ( ax );
+	push ( cx );
+
+	xor ( ax, ax);
+	mov ( value, ax );
+
+	xor ( cl, cl);
+	while ( cl < 16 ) do
+
+		shl( 1, ax);
+
+		if ( @c ) then
+			stdout.put ( '1' );
+		else
+			stdout.put ( '0' );
+		endif;
+
+		inc( cl );
+
+	endwhile;
+
+	pop ( cx );
+	pop ( ax );
+
+end			showBinary16;
+
+begin		bug2k;
+
+	stdout.put ( "Entre une date sous le format 'mm dd yy' : " );
+	stdin.get ( mois, jour, annee );
+
+	xor ( ax, ax );
+	mov ( ax, paquet_date );
+
+	if ( mois > 12 || mois== 0 ) then
+
+		stdout.put ( "Le mois doit etre compris entre 1 et 12", nl );
+
+	elseif ( jour > 31 || jour == 0 ) then
+
+		stdout.put ( "Le jour doit etre compris entre 1 et 31", nl );
+
+	elseif ( annee > 99 ) then
+
+		stdout.put ( "On sais tous qu'un ans est compris entre 0 et 99" , nl );
+
+	else
+		
+		mov ( mois, al );	// %0000_0000_0000_MMMM
+		shl ( 5, ax );		// %0000_000M_MMM0_0000
+		or  ( jour, al);	// %0000_000M_MMM0_DDDD
+		shl ( 7, ax );		// %MMMM_0DDD_D000_0000
+		or  ( annee, al );	// %MMMM_0DDD_DYYY_YYYY
+		mov ( ax, paquet_date );
+
+	endif;
+
+	stdout.put ( "paquet_date = %" );
+	showBinary16 ( (type word ax) );
+	stdout.newln ();
+
+	// ajoutez le depaquetage du word en utilisant shr(), and() et rol()
+	// afficher les variable depaqueter en decimal
+
+end			bug2k;
