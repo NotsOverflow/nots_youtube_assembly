@@ -1,0 +1,129 @@
+Program		bug2k;
+
+	#include ( "stdlib.hhf" )
+
+static
+
+	jour:			uns8;
+	mois:			uns8;
+	annee:			uns8;
+
+	paquet_date:	word;
+
+procedure	showBinary16 ( value: word );
+begin		showBinary16;
+
+	push ( ax );
+	push ( cx );
+    push ( bx );
+
+	xor ( ax, ax);
+	mov ( value, ax );
+
+    xor ( bl, bl);
+    mov ( 16, bx);
+
+	xor ( cl, cl);
+	Looping:
+
+		shl ( 1, ax);
+
+        jnc  NoCarry;
+        Carry:
+			stdout.put ( '1' );
+            jmp AfterCarry;
+		NoCarry:
+			stdout.put ( '0' );
+        AfterCarry:
+
+		inc ( cl );
+        cmp ( bl, cl);
+        jg Looping;
+
+    pop ( bx );
+	pop ( cx );
+	pop ( ax );
+
+end			showBinary16;
+
+begin		bug2k;
+
+	stdout.put ( nl, "Entre une date sous le format 'mm dd yy' : " );
+	stdin.get ( mois, jour, annee );
+
+	xor ( ax, ax );
+	mov ( ax, paquet_date );
+
+    xor ( bl, bl);
+    mov ( mois, bl);
+    xor ( cl, cl);
+
+    cmp ( cl, bl);
+    je  ErMois;
+
+    mov (13,cl);
+
+    cmp ( cl, bl);
+    jng  ErMois;
+
+    xor ( bl, bl);
+    mov ( jour, bl);
+    xor ( cl, cl);
+
+    cmp ( cl, bl);
+    je  ErJour;
+
+    mov ( 32, cl);
+
+    cmp ( cl, bl);
+    jng  ErJour;
+
+    xor ( bl,bl);
+    mov ( annee, bl);
+    xor ( cl, cl);
+    
+    mov ( 100, cl);
+
+    cmp ( cl, bl);
+    jng ErAnnee;
+
+    mov ( mois, al );   // %0000_0000_0000_MMMM
+    shl ( 5, ax );      // %0000_000M_MMM0_0000
+    or  ( jour, al);    // %0000_000M_MMM0_DDDD
+    shl ( 7, ax );      // %MMMM_0DDD_D000_0000
+    or  ( annee, al );  // %MMMM_0DDD_DYYY_YYYY
+    mov ( ax, paquet_date );
+    
+    stdout.put ( nl, "paquet_date = %" );
+	showBinary16 ( (type word ax) );
+	stdout.newln ();
+
+    xor ( eax, eax );
+    mov ( paquet_date, ax);                             // %MMMM_0DDD_DYYY_YYYY         
+    rol ( 4, ax);                                       // %0DDD_DYYY_YYYY_MMMM
+    and ( $F, ax);                                      // %0000_0000_0000_MMMM
+    stdout.put ( nl, "mois = ", ( type uns32 eax ));
+
+    xor ( ax, ax );
+    mov ( paquet_date , ax);                            // %MMMM_0DDD_DYYY_YYYY
+    shr ( 7, ax);                                       // %0000_000M_MMM0_DDDD
+    and ( $1F, ax );                                    // %0000_0000_0000_DDDD
+    stdout.put ( nl, "jour = ", ( type uns32 eax));
+
+    xor (ax, ax);
+    mov ( paquet_date, ax);                             // %MMMM_0DDD_DYYY_YYYY
+    and ( $7F, ax);                                     // %0000_0000_0YYY_YYYY
+    stdout.put ( nl, "annee = ", ( type uns32 eax), nl, nl);
+    
+    jmp AfterEr;
+    ErMois:
+        stdout.put ( "Le mois doit etre compris entre 1 et 12", nl );
+        jmp AfterEr;
+    ErJour:
+        stdout.put ( "Le jour doit etre compris entre 1 et 31", nl );
+        jmp AfterEr;
+    ErAnnee:
+        stdout.put ( "On sais tous qu'un ans est compris entre 0 et 99" , nl );
+    AfterEr:
+
+end			bug2k;
