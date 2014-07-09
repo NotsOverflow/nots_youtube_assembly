@@ -101,3 +101,13 @@ int main(int argc, char **argv)
  
     return 0; // on quite sans erreur
 }
+
+//ml64 shell64.asm /link /entry:main
+
+//dumpbin /headers shell64.exe
+
+//dd.exe if=[exe] of=[bin] bs=1 count=[virtual size] skip=[file pointer to raw data]
+
+//dd.exe if=shell64.exe of=shell64.bin bs=1 count=434 skip=512
+
+// runbin.exe shell64.bin
