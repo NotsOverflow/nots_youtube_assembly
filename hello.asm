@@ -23,3 +23,5 @@ extern ExitProcess : proc
         add rsp, 28h
     main endp
 end
+
+;ml64 hello.asm /link /subsystem:windows /defaultlib:kernel32.lib /defaultlib:user32.lib /entry:main
